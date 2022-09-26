@@ -15,7 +15,7 @@
     </form>
 
     <script>
-      const ONE_BYTE = 1024;
+      const ONE_KILO_BYTE = 1024;
       const form = document.querySelector(`form`);
 
       /**
@@ -27,16 +27,17 @@
         const chunks = [];
 
         /** @type {number} file size in bytes */
-        const chunkSize = ONE_BYTE * 10;
+        const chunkSize = ONE_KILO_BYTE * 1024;
 
         let start = 0;
         let end = chunkSize;
 
         while (start <= file.size) {
-          chunks.push(file.slice(start, end, file.type));
+          const chunk = file.slice(start, end, file.type);
+          chunks.push(chunk);
 
           start = end;
-          end += chunkSize + end + 1; // slice reads end - 1 position
+          end += chunkSize;
         }
 
         return chunks;

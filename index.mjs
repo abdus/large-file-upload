@@ -27,7 +27,7 @@ function mergeFile(dest, extName) {
     const chunkContent = fs.readFileSync(chunkPath);
 
     fs.appendFileSync(path.join(dest, "merged." + extName), chunkContent);
-    fs.unlinkSync(chunkPath);
+    //fs.unlinkSync(chunkPath);
   }
 
   return path.resolve(path.join(dest, "merged." + extName));
