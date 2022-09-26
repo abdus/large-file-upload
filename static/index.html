@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chunk File Upload</title>
+  </head>
+  <body>
+    <form>
+      <label>
+        upload file
+        <input type="file" name="file" />
+      </label>
+
+      <button type="submit">SUBMIT</button>
+    </form>
+
+    <script>
+      const ONE_BYTE = 1024;
+      const form = document.querySelector(`form`);
+
+      /**
+       * @param {File} file
+       * @returns {Blob[]}
+       */
+      function chunkify(file) {
+        /** @type {Blob[]} */
+        const chunks = [];
+
+        /** @type {number} file size in bytes */
+        const chunkSize = ONE_BYTE * 10;
+
+        let start = 0;
+        let end = chunkSize;
+
+        while (start <= file.size) {
+          chunks.push(file.slice(start, end, file.type));
+
+          start = end;
+          end += chunkSize + end + 1; // slice reads end - 1 position
+        }
+
+        return chunks;
+      }
+
+      form.addEventListener("submit", (ev) => {
+        ev.preventDefault();
+
+        const formData = new FormData(ev.currentTarget);
+
+        /** @type {File} file */
+        const file = formData.get("file");
+        const chunks = chunkify(file);
+        const fileId = crypto.randomUUID();
+
+        chunks.forEach(async (chunk, i) => {
+          const formData = new FormData();
+
+          formData.append("file", chunk);
+          formData.append("fileName", i);
+          formData.append("fileId", fileId);
+          formData.append("mimeType", chunk.type);
+          formData.append("chunkCount", chunks.length);
+
+          const raw = await fetch("/api/upload", {
+            body: formData,
+            method: "POST",
+          });
+
+          const json = await raw.json();
+          console.log(json);
+        });
+      });
+    </script>
+  </body>
+</html>
